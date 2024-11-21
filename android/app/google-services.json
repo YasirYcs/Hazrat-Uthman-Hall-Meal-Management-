@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "676101170281",
+    "project_id": "hostel-meal-e379c",
+    "storage_bucket": "hostel-meal-e379c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:676101170281:android:e889629dbe70f9a76aaef8",
+        "android_client_info": {
+          "package_name": "com.yasir.ycs.hallmeal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAze65w_KmkOvM4-YE0pP2yAsY4MYsF7Ew"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
