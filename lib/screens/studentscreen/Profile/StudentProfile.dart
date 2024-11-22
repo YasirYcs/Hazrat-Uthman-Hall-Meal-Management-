@@ -1,124 +1,122 @@
 import 'package:flutter/material.dart';
-import 'FacultyDetails.dart'; // Import the FacultyDetails class
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'StudentProfileEdit.dart';
+import 'package:get/get.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class StudentProfile extends StatefulWidget {
-  final String studentId; // Pass the student ID to fetch the correct profile
+  final String studentId;
 
-  StudentProfile({required this.studentId});
+  const StudentProfile({super.key, required this.studentId});
 
   @override
-  _StudentProfilePageState createState() => _StudentProfilePageState();
+  _StudentDetailShowState createState() => _StudentDetailShowState();
 }
 
-class _StudentProfilePageState extends State<StudentProfile> {
-  Map<String, dynamic>? studentData;
-  bool isLoading = true; // Track loading state
-  bool hasError = false; // Track if there was an error fetching data
+class _StudentDetailShowState extends State<StudentProfile> {
+  final RefreshController _refreshController = RefreshController(initialRefresh: false);
+  Future<Map<String, dynamic>?>? _studentData;
 
   @override
   void initState() {
     super.initState();
     _fetchStudentData();
   }
-
+  final user = FirebaseAuth.instance.currentUser;
   Future<void> _fetchStudentData() async {
     try {
-      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+      final DocumentSnapshot snapshot = await FirebaseFirestore.instance
           .collection('students')
-          .doc(widget.studentId)
+          .doc(user?.uid)
           .get();
 
       if (snapshot.exists) {
         setState(() {
-          studentData = snapshot.data() as Map<String, dynamic>;
-          isLoading = false; // Data fetched successfully
+          _studentData = Future.value(snapshot.data() as Map<String, dynamic>);
         });
       } else {
-        _setDummyData(); // Set dummy data if no document exists
+        setState(() {
+          _studentData = null;
+        });
       }
     } catch (e) {
-      print('Error fetching student data: $e');
-      _setDummyData(); // Set dummy data in case of an error
+      print('Error fetching student: $e');
+      setState(() {
+        _studentData = null;
+      });
     }
   }
 
-  void _setDummyData() {
-    setState(() {
-      studentData = {
-        'fullName': 'John Doe',
-        'roomNumber': '101',
-        'studentId': 'S123456',
-        'canteenSerialNumber': 'C123',
-        'faculty': 'Computer Science',
-        'program': 'BSc in Computer Science',
-        'batch': '2023',
-        'whatsappNumber': '01234567890',
-        'phoneNumber': '09876543210',
-      };
-      isLoading = false; // Stop loading
-      hasError = true; // Indicate that there was an error
-    });
-  }
-
-  void _editProfile() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => StudentProfileEditPage(studentId: widget.studentId),
-      ),
-    ).then((_) {
-      // Refresh the profile data after returning from the edit page
-      _fetchStudentData();
-    });
+  void _onRefresh() async {
+    await _fetchStudentData();
+    _refreshController.refreshCompleted();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
+        title: const Text("Student Profile"),
         backgroundColor: Colors.purple,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         actions: [
           IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: _editProfile,
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              Get.to(() => StudentProfileEdit());
+            },
           ),
         ],
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildProfileSection('Personal Information', [
-                _buildProfileDetail('Full Name', studentData!['fullName']),
-                _buildProfileDetail('Room Number', studentData!['roomNumber']),
-                _buildProfileDetail('Student ID', studentData!['studentId']),
-                _buildProfileDetail('Canteen Serial Number', studentData!['canteenSerialNumber']),
-              ]),
-              _buildProfileSection('Academic Information', [
-                _buildProfileDetail('Faculty', studentData!['faculty']),
-                _buildProfileDetail('Program', studentData!['program']),
-                _buildProfileDetail('Batch', studentData!['batch']),
-              ]),
-              _buildProfileSection('Contact Information', [
-                _buildProfileDetail('WhatsApp Number', studentData!['whatsappNumber']),
-                _buildProfileDetail('Phone Number', studentData!['phoneNumber']),
-              ]),
-              if (hasError) // Show error message if there was an error
-                Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: Text(
-                    'Unable to load data. Showing dummy data instead.',
-                    style: TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
+      body: SmartRefresher(
+        controller: _refreshController,
+        onRefresh: _onRefresh,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: FutureBuilder<Map<String, dynamic>?>(
+            future: _studentData,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text("Error: ${snapshot.error}"));
+              } else if (!snapshot.hasData || snapshot.data == null) {
+                return const Center(child: Text("Student not found."));
+              } else {
+                final student = snapshot.data!;
+                return SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 20),
+                      _buildProfileSection('Personal Information', [
+                        _buildProfileDetail('Full Name', student['fullName']),
+                        _buildProfileDetail('Room Number', student['roomNumber']),
+                        _buildProfileDetail('Student ID', student['studentId']),
+                        _buildProfileDetail('Canteen Serial Number', student['canteenSerialNumber']),
+                      ]),
+                      SizedBox(height: 16),
+                      _buildProfileSection('Academic Information', [
+                        _buildProfileDetail('Faculty', student['faculty']),
+                        _buildProfileDetail('Program', student['program']),
+                        _buildProfileDetail('Batch', student['batch']),
+                      ]),
+                      SizedBox(height: 16),
+                      _buildProfileSection('Contact Information', [
+                        _buildProfileDetail('WhatsApp Number', student['whatsappNumber']),
+                        _buildProfileDetail('Phone Number', student['phoneNumber']),
+                      ]),
+                    ],
                   ),
-                ),
-            ],
+                );
+              }
+            },
           ),
         ),
       ),
@@ -126,15 +124,27 @@ class _StudentProfilePageState extends State<StudentProfile> {
   }
 
   Widget _buildProfileSection(String title, List<Widget> details) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child : Column(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.purple),
           ),
+          SizedBox(height: 8),
           ...details,
         ],
       ),
@@ -147,216 +157,13 @@ class _StudentProfilePageState extends State<StudentProfile> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-          Text(value ?? 'N/A', style: TextStyle(color: Colors.grey[700])),
+          Expanded(child: Text(label, style: TextStyle(fontWeight: FontWeight.bold))),
+          SizedBox(width: 10),
+          Expanded(
+            child: Text(value ?? 'N/A', style: TextStyle(color: Colors.grey[700])),
+          ),
         ],
       ),
     );
-  }
-}
-
-class StudentProfileEditPage extends StatefulWidget {
-  final String studentId;
-
-  StudentProfileEditPage({required this.studentId});
-
-  @override
-  _StudentProfileEditPageState createState() => _StudentProfileEditPageState();
-}
-
-class _StudentProfileEditPageState extends State<StudentProfileEditPage> {
-  final _formKey = GlobalKey<FormState>();
-  String? fullName;
-  String? roomNumber;
-  String? studentId;
-  String? canteenSerialNumber;
-  String? selectedFaculty;
-  String? selectedProgram;
-  String? selectedBatch;
-  String? whatsappNumber;
-  String? phoneNumber;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchStudentData();
-  }
-
-  Future<void> _fetchStudentData() async {
-    try {
-      DocumentSnapshot snapshot = await FirebaseFirestore.instance
-          .collection('students')
-          .doc(widget.studentId)
-          .get();
-
-      if (snapshot.exists) {
-        setState(() {
-          fullName = snapshot['fullName'];
-          roomNumber = snapshot['roomNumber'];
-          studentId = snapshot['studentId'];
-          canteenSerialNumber = snapshot['canteenSerialNumber'];
-          selectedFaculty = snapshot['faculty'];
-          selectedProgram = snapshot['program'];
-          selectedBatch = snapshot['batch'];
-          whatsappNumber = snapshot['whatsappNumber'];
-          phoneNumber = snapshot['phoneNumber'];
-        });
-      }
-    } catch (e) {
-      print('Error fetching student data: $e');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Edit Profile'),
-        backgroundColor: Colors.purple,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                _buildTextField(
-                  label: 'Full Name',
-                  initialValue: fullName,
-                  onSaved: (value) => fullName = value,
-                ),
-                _buildTextField(
-                  label: 'Room Number',
-                  initialValue: roomNumber,
-                  onSaved: (value) => roomNumber = value,
-                ),
-                _buildTextField(
-                  label: 'Student ID',
-                  initialValue: studentId,
-                  onSaved: (value) => studentId = value,
-                ),
-                _buildTextField(
-                  label: 'Canteen Serial Number',
-                  initialValue: canteenSerialNumber,
-                  onSaved: (value) => canteenSerialNumber = value,
-                ),
-                _buildDropdownField(
-                  label: 'Faculty',
-                  items: FacultyDetails.getAllFaculties(),
-                  initialValue: selectedFaculty,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedFaculty = value;
-                    });
-                  },
-                ),
-                _buildDropdownField(
-                  label: 'Program',
-                  items: selectedFaculty != null
-                      ? FacultyDetails.getPrograms(selectedFaculty!)
-                      : [],
-                  initialValue: selectedProgram,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedProgram = value;
-                    });
-                  },
-                ),
-                _buildDropdownField(
-                  label: 'Batch',
-                  items: List.generate(60, (index) => (index + 1).toString()),
-                  initialValue: selectedBatch,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedBatch = value;
-                    });
-                  },
-                ),
-                _buildTextField(
-                  label: 'WhatsApp Number',
-                  initialValue: whatsappNumber,
-                  onSaved: (value) => whatsappNumber = value,
-                ),
-                _buildTextField(
-                  label: 'Phone Number',
-                  initialValue: phoneNumber,
-                  onSaved: (value) => phoneNumber = value,
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _submitForm,
-                  child: Text('Save Changes'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required String label,
-    String? initialValue,
-    required FormFieldSetter<String> onSaved,
-  }) {
-    return TextFormField(
-      decoration: InputDecoration(labelText: label),
-      initialValue: initialValue,
-      onSaved: onSaved,
-    );
-  }
-
-  Widget _buildDropdownField({
-    required String label,
-    required List<String> items,
-    String? initialValue,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return DropdownButtonFormField<String>(
-      decoration: InputDecoration(labelText: label),
-      value: initialValue,
-      items: items.map((String item) {
-        return DropdownMenuItem<String>(
-          value: item,
-          child: Text(item),
-        );
-      }).toList(),
-      onChanged: onChanged,
-    );
-  }
-
-  Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-
-      Map<String, dynamic> studentData = {
-        'fullName': fullName,
-        'roomNumber': roomNumber,
-        'studentId': studentId,
-        'canteenSerialNumber': canteenSerialNumber,
-        'faculty': selectedFaculty,
-        'program': selectedProgram,
-        'batch': selectedBatch,
-        'whatsappNumber': whatsappNumber,
-        'phoneNumber': phoneNumber,
-      };
-
-      try {
-        await FirebaseFirestore.instance
-            .collection('students')
-            .doc(widget.studentId)
-            .update(studentData);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Profile updated successfully!')),
-        );
-        Navigator.pop(context); // Navigate back after saving
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update profile: $e')),
-        );
-      }
-    }
   }
 }

@@ -114,7 +114,7 @@ Future<void> logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
 
     // Navigate to the login page after logout
-    Get.off(Studentloginpage()); // Ensure LoginPage is correctly referenced
+    Get.off(StudentloginPage()); // Ensure LoginPage is correctly referenced
   } catch (e) {
     // Handle logout error
     print('Error logging out: $e');

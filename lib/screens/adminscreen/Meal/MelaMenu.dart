@@ -1,12 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MealMenu extends StatefulWidget {
-  final String username; // Pass the username to the constructor
-
-  MealMenu({required this.username});
-
   @override
   _MealMenuState createState() => _MealMenuState();
 }
@@ -17,13 +15,48 @@ class _MealMenuState extends State<MealMenu> {
   final TextEditingController _dinnerController = TextEditingController();
   String _formattedDateTime = '';
   String _submittedData = '';
+  String _username = 'Loading...';
+
+  final _databaseReference = FirebaseDatabase.instance.ref().child('meal_menu');
+  final _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
     super.initState();
     _updateDateTime();
-    // Update the time every second
     Future.delayed(Duration(seconds: 1), _updateDateTime);
+    _fetchUserData();
+  }
+
+  Future<void> _fetchUserData() async {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+
+    try {
+      DocumentSnapshot userDoc = await _firestore.collection('students').doc(uid).get();
+      if (userDoc.exists) {
+        Map<String, dynamic>? userData = userDoc.data() as Map<String, dynamic>?;
+        if (userData != null && userData.containsKey('fullName')) {
+          setState(() {
+            _username = userData['fullName'];
+          });
+        } else {
+          print('Error fetching user data: "fullName" field not found');
+          setState(() {
+            _username = 'User data incomplete';
+          });
+        }
+      } else {
+        print('Error fetching user data: User document not found');
+        setState(() {
+          _username = 'User not found';
+        });
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+      setState(() {
+        _username = 'Error fetching user data';
+      });
+    }
   }
 
   void _updateDateTime() {
@@ -39,23 +72,17 @@ class _MealMenuState extends State<MealMenu> {
     String dinner = _dinnerController.text;
 
     if (breakfast.isNotEmpty || lunch.isNotEmpty || dinner.isNotEmpty) {
-      // Get the current date in YYYY-MM-DD format
       String date = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-      // Reference to the Firebase Realtime Database
-      DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('meal_menu').child(date);
-
-      // Write the meal data to the database
-      databaseReference.set({
+      _databaseReference.child(date).set({
         'breakfast': breakfast,
         'lunch': lunch,
         'dinner': dinner,
-        'submittedAt': _formattedDateTime, // Optional: Store the formatted date and time
+        'submittedAt': _formattedDateTime,
       }).then((_) {
         setState(() {
           _submittedData = 'Breakfast: $breakfast, Lunch: $lunch, Dinner: $dinner';
         });
-        // Clear the text fields after submission
         _breakfastController.clear();
         _lunchController.clear();
         _dinnerController.clear();
@@ -69,17 +96,13 @@ class _MealMenuState extends State<MealMenu> {
         );
       });
     } else {
-      // Show an error message if all fields are empty
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please enter at least one meal option')),
       );
     }
   }
 
-  void _updateMealMenu() {
-    // Logic to update the meal menu (to be implemented)
-    print('Meal Menu Updated: Breakfast: ${_breakfastController.text}, Lunch: ${_lunchController.text}, Dinner: ${_dinnerController.text}');
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -94,9 +117,8 @@ class _MealMenuState extends State<MealMenu> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Welcome Section
               Text(
-                'Welcome, ${widget.username}!',
+                'Welcome, $_username!',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10),
@@ -106,7 +128,6 @@ class _MealMenuState extends State<MealMenu> {
               ),
               SizedBox(height: 20),
 
-              // Breakfast Text Field
               TextField(
                 controller: _breakfastController,
                 decoration: InputDecoration(
@@ -117,7 +138,6 @@ class _MealMenuState extends State<MealMenu> {
                 ),
               ),
               Divider(height: 20, thickness: 1, color: Colors.grey),
-              // Lunch Text Field
               TextField(
                 controller: _lunchController,
                 decoration: InputDecoration(
@@ -128,7 +148,6 @@ class _MealMenuState extends State<MealMenu> {
                 ),
               ),
               Divider(height: 20, thickness: 1, color: Colors.grey),
-              // Dinner Text Field
               TextField(
                 controller: _dinnerController,
                 decoration: InputDecoration(
@@ -140,29 +159,17 @@ class _MealMenuState extends State<MealMenu> {
               ),
               SizedBox(height: 20),
 
-              // Submit Button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green, // Background color
-                  foregroundColor: Colors.white, // Text color
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
                 ),
                 onPressed: _submitMealMenu,
-                child: Text('Submit'),
-              ),
-              SizedBox(height: 10),
-
-              // Update Button
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange, // Background color
-                  foregroundColor: Colors.white, // Text color
-                ),
-                onPressed: _updateMealMenu,
                 child: Text('Update'),
               ),
+              SizedBox(height: 10),
               SizedBox(height: 20),
 
-              // Display Date and Time
               Text(
                 'Current Date and Time:',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -173,7 +180,6 @@ class _MealMenuState extends State<MealMenu> {
               ),
               SizedBox(height: 20),
 
-              // Submitted Data Section
               Text(
                 'Submitted Meal Options:',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

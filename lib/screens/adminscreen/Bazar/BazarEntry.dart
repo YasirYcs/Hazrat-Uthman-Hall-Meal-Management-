@@ -1,11 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class BazarEntry extends StatefulWidget {
-  final String username; // Pass the username to the constructor
+  final String username; // Add username as a parameter
 
-  BazarEntry({required this.username});
+  BazarEntry({required this.username}); // Constructor to accept username
 
   @override
   _BazarEntryState createState() => _BazarEntryState();
@@ -14,14 +16,32 @@ class BazarEntry extends StatefulWidget {
 class _BazarEntryState extends State<BazarEntry> {
   final TextEditingController _bazarController = TextEditingController();
   String _formattedDateTime = '';
-  String _submittedBazar = ''; // Variable to hold submitted bazar amount
+  String _submittedBazar = '';
+  String _uid = ''; // Store the user ID retrieved from Firebase Auth
+
+  final _databaseReference = FirebaseDatabase.instance.ref().child('bazar');
+  final _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
     super.initState();
     _updateDateTime();
-    // Update the time every second
     Future.delayed(Duration(seconds: 1), _updateDateTime);
+    _fetchUid();
+  }
+
+  Future<void> _fetchUid() async {
+    User? user = FirebaseAuth.instance.currentUser ; // Get the current user
+    if (user != null) {
+      setState(() {
+        _uid = user.uid; // Set the UID if the user is logged in
+      });
+    } else {
+      // Handle the case where the user is not logged in
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('User  not logged in. Please log in.')),
+      );
+    }
   }
 
   void _updateDateTime() {
@@ -33,22 +53,16 @@ class _BazarEntryState extends State<BazarEntry> {
 
   void _submitBazar() {
     String bazarAmount = _bazarController.text;
-    if (bazarAmount.isNotEmpty) {
-      // Get the current date in YYYY-MM-DD format
+    if (bazarAmount.isNotEmpty && _uid.isNotEmpty) { // Check if UID is available
       String date = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-      // Reference to the Firebase Realtime Database
-      DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('bazar').child(date);
-
-      // Write the bazar amount to the database
-      databaseReference.set({
+      _databaseReference.child(_uid).child(date).set({
         'amount': bazarAmount,
-        'submittedAt': _formattedDateTime, // Optional: Store the formatted date and time
+        'submittedAt': _formattedDateTime,
       }).then((_) {
         setState(() {
-          _submittedBazar = 'Bazar Amount: $bazarAmount'; // Store the submitted bazar amount
+          _submittedBazar = 'Bazar Amount: $bazarAmount';
         });
-        // Clear the text field after submission
         _bazarController.clear();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Bazar amount submitted successfully!')),
@@ -60,17 +74,10 @@ class _BazarEntryState extends State<BazarEntry> {
         );
       });
     } else {
-      // Show an error message if the field is empty
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please enter a bazar amount')),
       );
     }
-  }
-
-  void _updateBazar() {
-    // Logic to update the bazar amount
-    // This can be implemented later
-    print('Bazar Amount Updated: ${_bazarController.text}');
   }
 
   @override
@@ -86,7 +93,6 @@ class _BazarEntryState extends State<BazarEntry> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Greeting and Introduction
               Text(
                 'Assalamualaikum, ${widget.username}!',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -97,8 +103,6 @@ class _BazarEntryState extends State<BazarEntry> {
                 style: TextStyle(fontSize: 16),
               ),
               SizedBox(height: 20),
-
-              // Bazar Amount Input Field
               TextField(
                 controller: _bazarController,
                 keyboardType: TextInputType.number,
@@ -109,29 +113,16 @@ class _BazarEntryState extends State<BazarEntry> {
               ),
               SizedBox(height: 20),
 
-              // Submit Button
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple, // Background color
-                  foregroundColor: Colors.white, // Text color
+                  backgroundColor: Colors.purple,
+                  foregroundColor: Colors.white,
                 ),
                 onPressed: _submitBazar,
                 child: Text('Submit'),
               ),
               SizedBox(height: 10),
-
-              // Update Button
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange, // Background color
-                  foregroundColor: Colors.white, // Text color
-                ),
-                onPressed: _updateBazar,
-                child: Text('Update'),
-              ),
               SizedBox(height: 20),
-
-              // Display Date and Time
               Text(
                 'Current Date and Time:',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -141,8 +132,6 @@ class _BazarEntryState extends State<BazarEntry> {
                 style: TextStyle(fontSize: 16),
               ),
               SizedBox(height: 20),
-
-              // Submitted Bazar Amount Section
               Text(
                 'Submitted Bazar Amount:',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

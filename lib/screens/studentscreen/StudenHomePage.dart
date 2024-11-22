@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:hallmeal/screens/studentscreen/MealBook/MealBook.dart';
+import 'package:hallmeal/screens/studentscreen/Profile/StudentProfile.dart';
 import 'package:hallmeal/services/AuthService.dart';
 import 'package:get/get.dart';
 import '../aboutpage.dart';
@@ -117,11 +119,10 @@ class _StudentHomePageState extends State<StudentHomePage> {
               ),
             ),
             _buildDrawerItem(Icons.house, "House", () {}),
-            _buildDrawerItem(Icons.menu_book, "Meal Menu", () {}),
-            _buildDrawerItem(Icons.food_bank, "Meal Entry", () {}),
-            _buildDrawerItem(Icons.person, "Profile", () {}),
-            _buildDrawerItem(Icons.tips_and_updates, "Tips and Updates", () {}),
-            _buildDrawerItem(Icons.share, "Share App", () {}),
+            _buildDrawerItem(Icons.food_bank, "Book Meals", () { Get.to(MealBook());}),
+            _buildDrawerItem(Icons.person, "Profile", () { Get.to(StudentProfile(studentId: "C223025"));}),
+            _buildDrawerItem(Icons.tips_and_updates, "Notice", () {}),
+            _buildDrawerItem(Icons.share, "Prayer", () {}),
             _buildDrawerItem(Icons.info, "About Us", () {
               Get.to(AboutPage());
             }),

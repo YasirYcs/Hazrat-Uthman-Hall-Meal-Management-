@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:hallmeal/screens/adminscreen/AdminLoginPage.dart';
 import 'package:hallmeal/screens/adminscreen/Bazar/BazarEntry.dart';
+import 'package:hallmeal/screens/adminscreen/Meal/MealEntry.dart';
 import 'package:hallmeal/screens/adminscreen/Meal/MelaMenu.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
 
 class AdminMenu extends StatefulWidget {
   @override
@@ -12,33 +16,108 @@ class AdminMenu extends StatefulWidget {
 
 class _AdminMenuState extends State<AdminMenu> {
   String _formattedDateTime = '';
-
-  void logout(BuildContext context) async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      // Optionally, navigate to the login screen after logout
-      Get.offAllNamed('/login'); // Adjust the route name as per your app's routing
-    } catch (e) {
-      // Handle any errors that occur during logout
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error logging out: $e')),
-      );
-    }
-  }
+  String? _fullName;
+  String? _studentId;
 
   @override
   void initState() {
     super.initState();
-    _updateDateTime();
-    // Update the time every second
-    Future.delayed(Duration(seconds: 1), _updateDateTime);
+    _startDateTimeUpdates();
+    _fetchStudentFullName();
   }
 
-  void _updateDateTime() {
-    setState(() {
-      _formattedDateTime = DateFormat('dd/MM/yyyy - hh:mm:ss a').format(DateTime.now());
+  void _startDateTimeUpdates() {
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        _formattedDateTime =
+            DateFormat('dd/MM/yyyy - hh:mm:ss a').format(DateTime.now());
+      });
     });
-    Future.delayed(Duration(seconds: 1), _updateDateTime);
+  }
+
+  //admin logout
+// Logout function
+  Future<void> adminlogout(BuildContext context) async {
+    try {
+      // Sign out from Firebase
+      await FirebaseAuth.instance.signOut();
+
+      // Navigate to the login page after logout
+      Get.off(AdminloginPage()); // Ensure LoginPage is correctly referenced
+    } catch (e) {
+      // Handle logout error
+      print('Error logging out: $e');
+      // Optionally, you can show a Snackbar or dialog to inform the user
+      Get.snackbar(
+        'Logout Error',
+        'An error occurred while logging out. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: Duration(seconds: 2),
+      );
+    }
+  }
+
+  Future<void> _fetchStudentFullName() async {
+    try {
+      User? currentUser  = FirebaseAuth.instance.currentUser ;
+      if (currentUser  == null) {
+        throw Exception('No user is logged in.');
+      }
+
+      String uid = currentUser .uid;
+      DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
+      await FirebaseFirestore.instance.collection('students').doc(uid).get();
+
+      if (documentSnapshot.exists) {
+        final data = documentSnapshot.data();
+        setState(() {
+          _fullName = data?['fullName'] ?? 'Unknown User';
+          _studentId = data?['studentId'] ?? 'Unknown ID';
+        });
+      } else {
+        throw Exception('No document found for UID: $uid');
+      }
+    } catch (e) {
+      print('Error fetching user details: $e');
+      setState(() {
+        _fullName = 'Unknown User';
+        _studentId = 'Unknown ID';
+      });
+    }
+  }
+
+  void logout(BuildContext context) async {
+    // Show a confirmation dialog before logging out
+    bool? confirmLogout = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Logout'),
+          content: Text('Are you sure you want to logout?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false), // Cancel
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true), // Confirm
+              child: Text('Logout'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmLogout == true) {
+      try {
+        await FirebaseAuth.instance.signOut();
+        Get.offAllNamed('/login');
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error logging out: $e')),
+        );
+      }
+    }
   }
 
   ListTile _buildDrawerItem(IconData icon, String title, VoidCallback onTap) {
@@ -58,7 +137,7 @@ class _AdminMenuState extends State<AdminMenu> {
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Image.asset('assets/photos/Pradduman.png', height: 40), // Replace with your logo path
+            child: Image.asset('assets/photos/Pradduman.png', height: 40),
           ),
         ],
       ),
@@ -67,52 +146,30 @@ class _AdminMenuState extends State<AdminMenu> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.purple,
-              ),
+              decoration: BoxDecoration(color: Colors.purple),
               child: Text(
                 'Admin Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+                style: TextStyle(color: Colors.white, fontSize: 24),
               ),
             ),
-            _buildDrawerItem(Icons.fastfood, 'Meal Menu', () {
-              Get.to(MealMenu(username: 'Sheikh Praddyuman'));
+            _buildDrawerItem(Icons.fastfood, 'Set Meal Menu', () {
+              Get.to(MealMenu());
             }),
             Divider(),
-            _buildDrawerItem(Icons.list, 'Bazars Entry', () {
-              Get.to(BazarEntry(username: 'Sheikh Praddyuman'));
+            _buildDrawerItem(Icons.list, 'Bazars Entry ', () {
+              Get.to(BazarEntry(username: _fullName ?? 'User '));
             }),
             Divider(),
             _buildDrawerItem(Icons.add, 'Meal Entry', () {
-              // Navigate to Meal Entry
+              Get.to(MealEntry());
             }),
             Divider(),
-            _buildDrawerItem(Icons.person, 'Profile', () {
-              // Navigate to Profile
-            }),
-            Divider(),
-            _buildDrawerItem(Icons.info, 'Tips and Updates', () {
-              // Navigate to Tips and Updates
-            }),
-            Divider(),
-            _buildDrawerItem(Icons.share, 'Share App', () {
-              // Share app functionality
-            }),
-            Divider(),
-            _buildDrawerItem(Icons.info_outline, 'About Us', () {
-              // Navigate to About Us
-            }),
-            Divider(),
-            _buildDrawerItem(Icons.logout, 'Logout', () => logout(context)), // Calls the logout function
+            _buildDrawerItem(Icons.logout, 'Logout', () => adminlogout(context)),
           ],
         ),
       ),
       body: Column(
         children: [
-          // Top Container for Username and Profile Picture
           Container(
             height: 150,
             color: Colors.purple,
@@ -122,7 +179,7 @@ class _AdminMenuState extends State<AdminMenu> {
                   padding: const EdgeInsets.all(16.0),
                   child: CircleAvatar(
                     radius: 40,
-                    backgroundImage: AssetImage('assets/photos/Pradduman.png'), // Replace with your profile picture path
+                    backgroundImage: AssetImage('assets/photos/Pradduman.png'),
                   ),
                 ),
                 Column(
@@ -130,7 +187,7 @@ class _AdminMenuState extends State<AdminMenu> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Sheikh Paddyuman', // Replace with dynamic username
+                      _fullName ?? 'Unknown User',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -138,7 +195,7 @@ class _AdminMenuState extends State<AdminMenu> {
                       ),
                     ),
                     Text(
-                      'cid.iiuc@ycs.com', // Replace with dynamic email
+                      _studentId ?? 'Unknown ID',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -149,7 +206,6 @@ class _AdminMenuState extends State<AdminMenu> {
               ],
             ),
           ),
-          // Status Container
           Container(
             padding: EdgeInsets.all(16.0),
             margin: EdgeInsets.all(16.0),
@@ -161,7 +217,7 @@ class _AdminMenuState extends State<AdminMenu> {
                   color: Colors.grey.withOpacity(0.5),
                   spreadRadius: 2,
                   blurRadius: 5,
-                  offset: Offset(0, 3), // changes position of shadow
+                  offset: Offset(0, 3),
                 ),
               ],
             ),
@@ -169,42 +225,44 @@ class _AdminMenuState extends State<AdminMenu> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Live Date and Time Block
-                Container(
-                  padding: EdgeInsets.all(10),
-                  margin: EdgeInsets.only(bottom: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[50],
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
-                        spreadRadius: 1,
-                        blurRadius: 3,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Live Date and Time:',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        _formattedDateTime,
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
+                Center(
+                  child: Container(
+                    padding: EdgeInsets.all(20),
+                    margin: EdgeInsets.only(bottom: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3),
+                          spreadRadius: 1,
+                          blurRadius: 3,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Text(
+                            'Live Date and Time:',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Center(
+                          child: Text(
+                            _formattedDateTime,
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                // Meal Rate Block
                 _buildInfoBlock('Meal Rate', '\$10.00'),
-                // Total Meal Block
                 _buildInfoBlock('Total Meal', '100'),
-                // Total Bazar Block
                 _buildInfoBlock('Total Bazar', '\$500.00'),
-                // Total Students Block
                 _buildInfoBlock('Total Students', '200'),
               ],
             ),

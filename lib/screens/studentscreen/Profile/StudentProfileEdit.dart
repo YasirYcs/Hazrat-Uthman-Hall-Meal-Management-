@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'FacultyDetails.dart'; // Import the FacultyDetails class
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 class StudentProfileEdit extends StatefulWidget {
   @override
   _ProfileEditPageState createState() => _ProfileEditPageState();
@@ -296,11 +297,13 @@ class _ProfileEditPageState extends State<StudentProfileEdit> {
     );
   }
 
+  final user = FirebaseAuth.instance.currentUser;
+
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // Create a map of the data to send to Fire store
+      // Create a map of the data to send to Firestore
       Map<String, dynamic> studentData = {
         'fullName': fullName,
         'roomNumber': roomNumber,
@@ -314,8 +317,12 @@ class _ProfileEditPageState extends State<StudentProfileEdit> {
       };
 
       try {
-        // Send data to Firestore
-        await FirebaseFirestore.instance.collection('students').add(studentData);
+        // Use set method with user.uid as the document ID
+        await FirebaseFirestore.instance
+            .collection('students')
+            .doc(user!.uid) // Use user.uid as the document ID
+            .set(studentData);
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Profile updated successfully!')),
         );
@@ -327,4 +334,4 @@ class _ProfileEditPageState extends State<StudentProfileEdit> {
       }
     }
   }
-}
+  }

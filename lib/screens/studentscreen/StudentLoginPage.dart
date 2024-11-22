@@ -6,77 +6,100 @@ import 'package:hallmeal/screens/studentscreen/StudentSignUpPage.dart';
 import '../adminscreen/AdminLoginPage.dart';
 import 'package:hallmeal/services/AuthService.dart';
 import '../studentscreen/StudentSignUpPage.dart';
- // Import the new BottomBar widget
 
-class Studentloginpage extends StatelessWidget {
-  const Studentloginpage({super.key});
+class StudentloginPage extends StatelessWidget {
+  const StudentloginPage({super.key});
 
   // Loading time
   Duration get loadingTime => const Duration(milliseconds: 2000);
 
-
-
-
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        child: Stack(
-          children: [
+      body: Stack(
+        children: [
+          // FlutterLogin section (unchanged)
+          FlutterLogin(
+            onLogin: (LoginData data) => authUser(data),
+            onRecoverPassword: (String email) => recoverPassword(email),
+            onSignup: (SignupData data) => signUp(data),
+          ),
 
-
-            FlutterLogin(
-              onLogin:  (LoginData data) => authUser (data),
-              onRecoverPassword: (String email) => recoverPassword(email),
-              onSignup: (SignupData data) => signUp(data),
-
-            ),
-            // Inside your Loginpage widget, add the following code for the Admin Login button
-            Positioned(
-              bottom: 200,
-              left: 120,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Navigate to the AdminLogin page using Get.to
-                  Get.to(Adminloginpage());
-                },
-                child: Text('Admin Login'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue, // Set the background color of the button
-                  foregroundColor: Colors.white, // Set the text color
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30), // Button padding
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), // Rounded corners
-                ),
+          // "STUDENT PAGE" label (unchanged)
+          Positioned(
+            top: 80,
+            left: 80,
+            child: Theme(
+              data: ThemeData(
+                primarySwatch: Colors.blue, // Assuming your primary color is blue
               ),
-            ),
-            Positioned(
-              top: 100,
-              left: 40,
               child: Container(
-                height: MediaQuery.of(context).size.height * 0.15,
-                width: MediaQuery.of(context).size.width * 0.8,
+                height: MediaQuery.of(context).size.height * 0.06,
+                width: MediaQuery.of(context).size.width * 0.6,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Colors.transparent, // Make container transparent
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.black, width: 2),
+                  border: Border.all(
+                    color: Theme.of(context).primaryColor.withOpacity(0.8), // Darker shade of primary color
+                    width: 5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.7),
+                      spreadRadius: 5,
+                      blurRadius: 7,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
                 ),
                 child: Center(
                   child: Text(
                     'STUDENT PAGE',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor, // Use primary color for text
+                    ),
                   ),
                 ),
               ),
             ),
+          ),
 
-            // Add the BottomBar widget here
-            // Pass the size to the BottomBar
-          ],
-        ),
+          // Add the Admin Login button as a floating button
+          Positioned(
+            bottom: 20.0, // Adjust position as needed
+            right: 20.0, // Adjust position as needed
+            child: Theme(
+              data: ThemeData(
+                primarySwatch: Colors.blue, // Assuming your primary color is blue
+                canvasColor: Colors.lightBlue, // Assuming your accent color is lightBlue
+              ),
+              child: FloatingActionButton.extended(
+                onPressed: () {
+                  Get.to(AdminloginPage());
+                },
+                icon: Icon(Icons.school_outlined, color: Theme.of(context).canvasColor),
+                label: Text(
+                  'Admin Login',
+                  style: TextStyle(color: Theme.of(context).canvasColor),
+                ),
+                backgroundColor: Theme.of(context).primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  side: BorderSide(
+                    color: Color(0xFF080808), // Darker shade of blue using hex code
+                    width: 2.0, // Set the border width
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+        ],
       ),
     );
   }
