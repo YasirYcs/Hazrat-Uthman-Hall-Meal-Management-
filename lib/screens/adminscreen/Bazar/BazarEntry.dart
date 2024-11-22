@@ -20,7 +20,7 @@ class _BazarEntryState extends State<BazarEntry> {
   String _uid = ''; // Store the user ID retrieved from Firebase Auth
 
   final _databaseReference = FirebaseDatabase.instance.ref().child('bazar');
-  final _firestore = FirebaseFirestore.instance;
+ // final _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
