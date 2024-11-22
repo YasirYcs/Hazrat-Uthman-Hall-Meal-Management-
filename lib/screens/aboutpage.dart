@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import for Clipboard
 import 'package:get/get.dart';
-import 'package:haptic_feedback/haptic_feedback.dart';
 
 class AboutPage extends StatelessWidget {
   @override

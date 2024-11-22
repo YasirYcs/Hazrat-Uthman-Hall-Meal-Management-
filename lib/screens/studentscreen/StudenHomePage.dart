@@ -5,7 +5,6 @@ import 'package:hallmeal/screens/studentscreen/Profile/StudentProfile.dart';
 import 'package:hallmeal/services/AuthService.dart';
 import 'package:get/get.dart';
 import '../aboutpage.dart';
-import 'MealBazarUpdate.dart';
 
 class StudentHomePage extends StatefulWidget {
   @override

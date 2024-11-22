@@ -2,10 +2,8 @@
 import 'package:flutter_login/flutter_login.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hallmeal/screens/studentscreen/StudentSignUpPage.dart';
 import '../adminscreen/AdminLoginPage.dart';
 import 'package:hallmeal/services/AuthService.dart';
-import '../studentscreen/StudentSignUpPage.dart';
 
 class StudentloginPage extends StatelessWidget {
   const StudentloginPage({super.key});

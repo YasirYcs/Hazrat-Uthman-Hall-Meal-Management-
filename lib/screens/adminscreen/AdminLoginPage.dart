@@ -1,10 +1,7 @@
 import 'package:flutter_login/flutter_login.dart';
 import 'package:flutter/material.dart';
-import '../adminscreen/AdminLoginPage.dart';
-import '../adminscreen/AdminMenu.dart';
 import 'package:hallmeal/services/AuthService.dart';
 import 'package:get/get.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../studentscreen/StudentLoginPage.dart';
 
 
