@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:hallmeal/screens/studentscreen/StudentPage.dart';
 import '../screens/studentscreen/StudenHomePage.dart';
 import 'package:flutter_login/flutter_login.dart';
 import '../screens/studentscreen/StudentLoginPage.dart';
@@ -30,7 +31,7 @@ Future<String?> authUser (LoginData data) async {
     );
     await Future.delayed(Duration(seconds: 2));
 
-    Get.off(StudentHomePage());
+    Get.off(StudentPage());
     return null; // Return user ID on successful login
   } catch (e) {
     return e.toString(); // Return error message
