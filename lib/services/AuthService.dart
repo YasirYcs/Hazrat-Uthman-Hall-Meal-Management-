@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:hallmeal/screens/studentscreen/StudentPage.dart';
-import '../screens/studentscreen/StudenHomePage.dart';
 import 'package:flutter_login/flutter_login.dart';
 import '../screens/studentscreen/StudentLoginPage.dart';
 import '../screens/adminscreen/AdminMenu.dart';
@@ -21,7 +20,7 @@ Future<String?> authUser (LoginData data) async {
       return 'Please verify your email before logging in.';
     }
     String userEmail = user?.email ?? 'Email not available';
-    String userName = user?.displayName ?? 'Name not available'; // If you have a display name
+    //String userName = user?.displayName ?? 'Name not available'; // If you have a display name
     // Show login success message using Snackbar
     Get.snackbar(
       'Login Successful',
@@ -54,7 +53,7 @@ Future<String?> authAdmin (LoginData data) async {
       return 'Please verify your email before logging in.';
     }
     String userEmail = user?.email ?? 'Email not available';
-    String userName = user?.displayName ?? 'Name not available'; // If you have a display name
+    //String userName = user?.displayName ?? 'Name not available'; // If you have a display name
     // Show login success message using Snackbar
     Get.snackbar(
       'Login Successful',
@@ -99,7 +98,7 @@ Future<String?> signUp(SignupData data) async {
     await user?.sendEmailVerification();
 
     String userEmail = user?.email ?? 'Boss';
-    String userName = user?.displayName ?? 'Boss'; // If you have a display name
+    //String userName = user?.displayName ?? 'Boss'; // If you have a display name
 
     return 'SignUp successful: $userEmail. A verification email has been sent to your email address.'; // Return user ID on successful sign-up
   } catch (e) {
