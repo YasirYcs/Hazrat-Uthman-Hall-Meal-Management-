@@ -22,7 +22,7 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Prayer Times'),
-        backgroundColor: Colors.teal,
+        backgroundColor: Color(0xFF5A4A75), // Set the AppBar color to the custom purple
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -31,7 +31,7 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
           },
         ),
       ),
-        body: Padding(
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,22 +39,23 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
             Text(
               'Today\'s Prayer Times (DEMO)',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
+                color: Color(0xFF5A4A75), // Use the custom color for headers
               ),
             ),
             SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: Colors.grey[200],
+                color: Color(0xFFF3F3F3), // Lighter background for the prayer times
               ),
               padding: EdgeInsets.all(16),
               child: Column(
                 children: prayerTimes.entries.map((entry) {
                   return ListTile(
-                    title: Text(entry.key),
-                    trailing: Text(entry.value),
+                    title: Text(entry.key, style: TextStyle(color: Color(0xFF5A4A75))), // Custom color for prayer names
+                    trailing: Text(entry.value, style: TextStyle(color: Colors.black)), // Black color for times
                   );
                 }).toList(),
               ),
@@ -63,8 +64,9 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
             Text(
               'Random Hadith',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
+                color: Color(0xFF5A4A75), // Custom color for Hadith title
               ),
             ),
             SizedBox(height: 16),
@@ -92,7 +94,7 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
                       margin: EdgeInsets.only(bottom: 10),
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.primaries[index % Colors.primaries.length],
+                        color: Color(0xFF5A4A75), // Use the custom color for the hadith container
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Column(
@@ -121,8 +123,6 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
                 },
               ),
             ),
-
-
           ],
         ),
       ),

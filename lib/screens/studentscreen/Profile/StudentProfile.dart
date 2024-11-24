@@ -6,9 +6,7 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class StudentProfile extends StatefulWidget {
-  final String studentId;
-
-  const StudentProfile({super.key, required this.studentId});
+  const StudentProfile({super.key});
 
   @override
   _StudentDetailShowState createState() => _StudentDetailShowState();
@@ -23,7 +21,9 @@ class _StudentDetailShowState extends State<StudentProfile> {
     super.initState();
     _fetchStudentData();
   }
+
   final user = FirebaseAuth.instance.currentUser;
+
   Future<void> _fetchStudentData() async {
     try {
       final DocumentSnapshot snapshot = await FirebaseFirestore.instance
@@ -58,7 +58,7 @@ class _StudentDetailShowState extends State<StudentProfile> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Student Profile"),
-        backgroundColor: Colors.purple,
+        backgroundColor: const Color(0xFF5A4A75), // Updated lighter purple
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -94,20 +94,20 @@ class _StudentDetailShowState extends State<StudentProfile> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       _buildProfileSection('Personal Information', [
                         _buildProfileDetail('Full Name', student['fullName']),
                         _buildProfileDetail('Room Number', student['roomNumber']),
                         _buildProfileDetail('Student ID', student['studentId']),
                         _buildProfileDetail('Canteen Serial Number', student['canteenSerialNumber']),
                       ]),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       _buildProfileSection('Academic Information', [
                         _buildProfileDetail('Faculty', student['faculty']),
                         _buildProfileDetail('Program', student['program']),
                         _buildProfileDetail('Batch', student['batch']),
                       ]),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       _buildProfileSection('Contact Information', [
                         _buildProfileDetail('WhatsApp Number', student['whatsappNumber']),
                         _buildProfileDetail('Phone Number', student['phoneNumber']),
@@ -126,9 +126,9 @@ class _StudentDetailShowState extends State<StudentProfile> {
   Widget _buildProfileSection(String title, List<Widget> details) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: const Color(0xFF5A4A75).withOpacity(0.1), // Lighter background using updated color
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black26,
             blurRadius: 8,
@@ -142,9 +142,13 @@ class _StudentDetailShowState extends State<StudentProfile> {
         children: [
           Text(
             title,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.purple),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF5A4A75), // Updated lighter purple for section title
+            ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           ...details,
         ],
       ),
@@ -157,10 +161,23 @@ class _StudentDetailShowState extends State<StudentProfile> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(child: Text(label, style: TextStyle(fontWeight: FontWeight.bold))),
-          SizedBox(width: 10),
           Expanded(
-            child: Text(value ?? 'N/A', style: TextStyle(color: Colors.grey[700])),
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF5A4A75), // Updated lighter purple for label text
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              value ?? 'N/A',
+              style: TextStyle(
+                color: const Color(0xFF5A4A75).withOpacity(0.8), // Slightly lighter for value text
+              ),
+            ),
           ),
         ],
       ),

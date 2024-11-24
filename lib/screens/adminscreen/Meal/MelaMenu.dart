@@ -34,7 +34,7 @@ class _MealMenuState extends State<MealMenu> {
   }
 
   Future<void> _fetchUserData() async {
-    String uid = FirebaseAuth.instance.currentUser !.uid;
+    String uid = FirebaseAuth.instance.currentUser!.uid;
 
     try {
       DocumentSnapshot userDoc = await _firestore.collection('students').doc(uid).get();
@@ -46,12 +46,12 @@ class _MealMenuState extends State<MealMenu> {
           });
         } else {
           setState(() {
-            _username = 'User  data incomplete';
+            _username = 'User data incomplete';
           });
         }
       } else {
         setState(() {
-          _username = 'User  not found';
+          _username = 'User not found';
         });
       }
     } catch (e) {
@@ -120,7 +120,7 @@ class _MealMenuState extends State<MealMenu> {
         );
       }).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar (content: Text('Failed to submit meal menu')),
+          SnackBar(content: Text('Failed to submit meal menu')),
         );
       });
     } else {
@@ -142,7 +142,7 @@ class _MealMenuState extends State<MealMenu> {
             Navigator.pop(context);
           },
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.teal,  // Teal color theme
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -154,7 +154,7 @@ class _MealMenuState extends State<MealMenu> {
               Container(
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.green[100],
+                  color: Colors.teal[100],  // Light teal background
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -169,27 +169,26 @@ class _MealMenuState extends State<MealMenu> {
                   children: [
                     Text(
                       'Welcome, $_username!',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green[800]),
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.teal[800]),  // Dark teal text
                     ),
                     SizedBox(height: 10),
                     Text(
                       'Please enter your meal options below.',
-                      style: TextStyle(fontSize: 16, color: Colors.green[600]),
+                      style: TextStyle(fontSize: 16, color: Colors.teal[600]),  // Medium teal text
                     ),
                   ],
                 ),
               ),
-             // SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Divider(thickness: 2,),
+                child: Divider(thickness: 2),
               ),
 
               // Meal Input Container
               Container(
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.green[100], // Gray with opacity
+                  color: Colors.teal[100],  // Light teal background
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -220,7 +219,7 @@ class _MealMenuState extends State<MealMenu> {
                     Center(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
+                          backgroundColor: Colors.teal,  // Teal button color
                           foregroundColor: Colors.white,
                           padding: EdgeInsets.symmetric(vertical: 20),
                         ),
@@ -232,7 +231,7 @@ class _MealMenuState extends State<MealMenu> {
                 ),
               ),
               SizedBox(height: 10),
-           Divider(thickness: 2,),
+              Divider(thickness: 2),
               SizedBox(height: 10),
               // Submitted Meal Options
               _buildInfoCard('Submitted Meal Options',
@@ -273,7 +272,7 @@ class _MealMenuState extends State<MealMenu> {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.green[100],
+        color: Colors.teal[100],  // Light teal background
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
@@ -286,17 +285,12 @@ class _MealMenuState extends State<MealMenu> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Text(
-              title,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green[800]),
-            ),
-          ),
-          SizedBox(height: 10, width: double.infinity,),
           Text(
-            content,
-            style: TextStyle(fontSize: 16, color: Colors.black54),
+            title,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal[800]),
           ),
+          SizedBox(height: 10),
+          Text(content, style: TextStyle(fontSize: 16)),
         ],
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'FacultyDetails.dart'; // Import the FacultyDetails class
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 class StudentProfileEdit extends StatefulWidget {
   @override
   _ProfileEditPageState createState() => _ProfileEditPageState();
@@ -32,7 +33,7 @@ class _ProfileEditPageState extends State<StudentProfileEdit> {
         title: Center(
           child: Text('Edit Profile'),
         ),
-        backgroundColor: Colors.purple, // Purple theme
+        backgroundColor: Color(0xFF5A4A75), // Set AppBar color to the specified color
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -213,7 +214,7 @@ class _ProfileEditPageState extends State<StudentProfileEdit> {
         style: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: Colors.purple,
+          color: Color(0xFF5A4A75), // Set section title color to the specified color
         ),
       ),
     );
@@ -297,7 +298,7 @@ class _ProfileEditPageState extends State<StudentProfileEdit> {
     );
   }
 
-  final user = FirebaseAuth.instance.currentUser;
+  final user = FirebaseAuth.instance.currentUser ;
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
@@ -334,4 +335,4 @@ class _ProfileEditPageState extends State<StudentProfileEdit> {
       }
     }
   }
-  }
+}

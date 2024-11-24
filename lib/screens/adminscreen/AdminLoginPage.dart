@@ -24,7 +24,7 @@ class AdminloginPage extends StatelessWidget {
           children: [
 
             FlutterLogin(
-              onLogin:  (LoginData data) => authAdmin (data),
+              onLogin:  (LoginData data) => authAdmin(data),
               onRecoverPassword: (String email) => recoverPassword(email),
               onSignup: (SignupData data) => signUp(data),
             ),

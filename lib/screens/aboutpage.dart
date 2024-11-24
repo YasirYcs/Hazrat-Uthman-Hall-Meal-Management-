@@ -8,36 +8,38 @@ class AboutPage extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.deepPurple[900],  // New background color
       appBar: AppBar(
         title: Text("About Me"),
-    backgroundColor: Colors.tealAccent,
-    leading: IconButton(
-    icon: Icon(Icons.arrow_back, color: Colors.black),
-    onPressed: () {
-    Get.back(); // Navigate back using GetX
-    },
-    ),
-    ),
-
-    body: SingleChildScrollView(
+        backgroundColor: Colors.deepPurple,  // AppBar color updated
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Get.back(); // Navigate back using GetX
+          },
+        ),
+      ),
+      body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: size.width * 0.1),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: size.height * 0.05),
-              // Animated Avatar
+              // Animated Avatar with border
               CircleAvatar(
-                child: Image.asset("assets/photos/YasirYcs.jpg"),
-                radius: 50,
+                child: ClipOval(
+                  child: Image.asset("assets/photos/YasirYcs.jpg"),
+                ),
+                radius: 55,
+                backgroundColor: Colors.tealAccent,  // Adding a border color
               ),
               SizedBox(height: size.height * 0.04),
               // User Details with Animations
               Text(
                 "YasirYcs",
                 style: TextStyle(
-                  fontSize: size.width * 0.07,
+                  fontSize: size.width * 0.08,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
@@ -46,8 +48,8 @@ class AboutPage extends StatelessWidget {
               Text(
                 "App Developer | Blogger | Gamer | Student",
                 style: TextStyle(
-                  fontSize: size.width * 0.045,
-                  color: Colors.grey,
+                  fontSize: size.width * 0.05,
+                  color: Colors.tealAccent,  // Updated text color
                   fontStyle: FontStyle.italic,
                 ),
                 textAlign: TextAlign.center,
@@ -57,7 +59,7 @@ class AboutPage extends StatelessWidget {
                 "University: International Islamic University Chittagong",
                 style: TextStyle(
                   fontSize: size.width * 0.04,
-                  color: Colors.grey,
+                  color: Colors.tealAccent,  // Updated text color
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -114,7 +116,7 @@ class AboutPage extends StatelessWidget {
                   "© 2024 YasirYcs. All rights reserved.",
                   style: TextStyle(
                     fontSize: size.width * 0.035,
-                    color: Colors.grey,
+                    color: Colors.tealAccent,  // Updated color
                   ),
                   textAlign: TextAlign.center,
                 ),

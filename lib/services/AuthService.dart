@@ -4,34 +4,53 @@ import 'package:get/get.dart';
 import 'package:hallmeal/screens/studentscreen/StudentPage.dart';
 import 'package:flutter_login/flutter_login.dart';
 import '../screens/studentscreen/StudentLoginPage.dart';
-import '../screens/adminscreen/AdminMenu.dart';
+import '../screens/adminscreen/Home/AdminMenu.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-// User Log in
 Future<String?> authUser (LoginData data) async {
   try {
+    // Sign in the user
     UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: data.name, // Assuming LoginData has an email field
       password: data.password, // Assuming LoginData has a password field
     );
+
     // Get user details
     User? user = userCredential.user;
+
     // Check if the email is verified
     if (user != null && !user.emailVerified) {
       return 'Please verify your email before logging in.';
     }
-    String userEmail = user?.email ?? 'Email not available';
-    //String userName = user?.displayName ?? 'Name not available'; // If you have a display name
-    // Show login success message using Snackbar
-    Get.snackbar(
-      'Login Successful',
-      'Welcome, $userEmail',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: Duration(seconds: 2),
-    );
-    await Future.delayed(Duration(seconds: 2));
 
-    Get.off(StudentPage());
-    return null; // Return user ID on successful login
+    // Fetch user role from Firestore
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user!.uid).get();
+
+    if (userDoc.exists) {
+      String userEmail = user.email ?? 'Email not available';
+      String role = userDoc['role']; // Get the role from Firestore
+
+      // Check if the user is a student
+      if (role == 'student') {
+        // Show login success message using Snackbar
+        Get.snackbar(
+          'Login Successful',
+          'Welcome, $userEmail',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: Duration(seconds: 2),
+        );
+
+        await Future.delayed(Duration(seconds: 2));
+
+        Get.off(StudentPage()); // Navigate to StudentPage
+      } else {
+        return 'You are not registered as a student.';
+      }
+    } else {
+      return 'User  document does not exist.';
+    }
+
+    return null; // Return null on successful login
   } catch (e) {
     return e.toString(); // Return error message
   }
@@ -42,34 +61,52 @@ Future<String?> authUser (LoginData data) async {
 
 Future<String?> authAdmin (LoginData data) async {
   try {
+    // Sign in the user
     UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: data.name, // Assuming LoginData has an email field
       password: data.password, // Assuming LoginData has a password field
     );
+
     // Get user details
     User? user = userCredential.user;
+
     // Check if the email is verified
     if (user != null && !user.emailVerified) {
       return 'Please verify your email before logging in.';
     }
-    String userEmail = user?.email ?? 'Email not available';
-    //String userName = user?.displayName ?? 'Name not available'; // If you have a display name
-    // Show login success message using Snackbar
-    Get.snackbar(
-      'Login Successful',
-      'Welcome, $userEmail',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: Duration(seconds: 2),
-    );
-    await Future.delayed(Duration(seconds: 2));
 
-    Get.off(AdminMenu());
-    return null; // Return user ID on successful login
+    // Fetch user role from Firestore
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user!.uid).get();
+
+    if (userDoc.exists) {
+      String userEmail = user.email ?? 'Email not available';
+      String role = userDoc['role']; // Get the role from Firestore
+
+      // Check if the user is a student
+      if (role == 'admin') {
+        // Show login success message using Snackbar
+        Get.snackbar(
+          'Login Successful As an Admin',
+          'Welcome, $userEmail',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: Duration(seconds: 2),
+        );
+
+        await Future.delayed(Duration(seconds: 2));
+
+        Get.off(AdminMenu()); // Navigate to StudentPage
+      } else {
+        return 'You are not registered as a Admin';
+      }
+    } else {
+      return 'Admin Details does not exist.';
+    }
+
+    return null; // Return null on successful login
   } catch (e) {
     return e.toString(); // Return error message
   }
 }
-
 
 
 
@@ -83,9 +120,9 @@ Future<String?> recoverPassword(String email) async {
   }
 }
 
-// Sign up
 Future<String?> signUp(SignupData data) async {
   try {
+    // Create user with email and password
     UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: data.name!, // Assuming SignupData has an email field
       password: data.password!, // Assuming SignupData has a password field
@@ -97,8 +134,13 @@ Future<String?> signUp(SignupData data) async {
     // Send verification email
     await user?.sendEmailVerification();
 
-    String userEmail = user?.email ?? 'Boss';
-    //String userName = user?.displayName ?? 'Boss'; // If you have a display name
+    // Store user role as 'student' in Firestore
+    await FirebaseFirestore.instance.collection('users').doc(user!.uid).set({
+      'email': user.email,
+      'role': 'student', // Hardcoded role as 'student'
+    });
+
+    String userEmail = user.email ?? 'Boss';
 
     return 'SignUp successful: $userEmail. A verification email has been sent to your email address.'; // Return user ID on successful sign-up
   } catch (e) {

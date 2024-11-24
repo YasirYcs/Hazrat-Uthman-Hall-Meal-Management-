@@ -19,7 +19,6 @@ class _BazarEntryState extends State<BazarEntry> {
   String _uid = ''; // Store the user ID retrieved from Firebase Auth
 
   final _databaseReference = FirebaseDatabase.instance.ref().child('bazar');
- // final _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -30,7 +29,7 @@ class _BazarEntryState extends State<BazarEntry> {
   }
 
   Future<void> _fetchUid() async {
-    User? user = FirebaseAuth.instance.currentUser ; // Get the current user
+    User? user = FirebaseAuth.instance.currentUser; // Get the current user
     if (user != null) {
       setState(() {
         _uid = user.uid; // Set the UID if the user is logged in
@@ -38,7 +37,7 @@ class _BazarEntryState extends State<BazarEntry> {
     } else {
       // Handle the case where the user is not logged in
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User  not logged in. Please log in.')),
+        SnackBar(content: Text('User not logged in. Please log in.')),
       );
     }
   }
@@ -84,7 +83,7 @@ class _BazarEntryState extends State<BazarEntry> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Bazar Entry'),
-        backgroundColor: Colors.purple,
+        backgroundColor: Colors.teal, // Changed to Teal
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -92,54 +91,12 @@ class _BazarEntryState extends State<BazarEntry> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Assalamualaikum, ${widget.username}!',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'Welcome to the Bazar Entry page. Please enter the bazar amount below.',
-                style: TextStyle(fontSize: 16),
-              ),
-              SizedBox(height: 20),
-              TextField(
-                controller: _bazarController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Enter Bazar Taka',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              SizedBox(height: 20),
-
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: _submitBazar,
-                child: Text('Submit'),
-              ),
-              SizedBox(height: 10),
-              SizedBox(height: 20),
-              Text(
-                'Current Date and Time:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                _formattedDateTime,
-                style: TextStyle(fontSize: 16),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Submitted Bazar Amount:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+              // Assalamualaikum Section
               Container(
-                padding: EdgeInsets.all(10),
+                padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.teal[50],
+                  borderRadius: BorderRadius.circular(15),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black26,
@@ -149,8 +106,136 @@ class _BazarEntryState extends State<BazarEntry> {
                   ],
                 ),
                 child: Text(
-                  _submittedBazar.isNotEmpty ? _submittedBazar : 'No bazar amount submitted yet.',
+                  'Assalamualaikum, ${widget.username}!',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.teal),
+                ),
+              ),
+              SizedBox(height: 20),
+
+              // Instructions Section
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.teal[50],
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 4,
+                      offset: Offset(2, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  'Welcome to the Bazar Entry page. Please enter the bazar amount below.',
                   style: TextStyle(fontSize: 16),
+                ),
+              ),
+              SizedBox(height: 20),
+
+              // Bazar Entry Section
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.teal[50],
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 4,
+                      offset: Offset(2, 2),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  controller: _bazarController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Enter Bazar Taka',
+                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.teal),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.teal),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+
+              // Update Button Section
+              Container(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal, // Changed to Teal
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: _submitBazar,
+                  child: Text('Update'), // Changed to "Update"
+                ),
+              ),
+              SizedBox(height: 20),
+
+              // Date and Time Section
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.teal[50],
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 4,
+                      offset: Offset(2, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Current Date and Time:',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      _formattedDateTime,
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 20),
+
+              // Submitted Bazar Section
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.teal[50],
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 4,
+                      offset: Offset(2, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Submitted Bazar Amount:',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      _submittedBazar.isNotEmpty ? _submittedBazar : 'No bazar amount submitted yet.',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
                 ),
               ),
             ],
