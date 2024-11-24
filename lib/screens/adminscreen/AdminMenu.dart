@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hallmeal/screens/adminscreen/AdminLoginPage.dart';
 import 'package:hallmeal/screens/adminscreen/Bazar/BazarEntry.dart';
-import 'package:hallmeal/screens/adminscreen/Meal/MealEntry.dart';
+import 'package:hallmeal/screens/adminscreen/Meal/MealRequests.dart';
 import 'package:hallmeal/screens/adminscreen/Meal/MelaMenu.dart';
+import 'package:hallmeal/screens/adminscreen/Noticeboard/SendNotice.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -160,8 +161,12 @@ class _AdminMenuState extends State<AdminMenu> {
               Get.to(BazarEntry(username: _fullName ?? 'User '));
             }),
             Divider(),
-            _buildDrawerItem(Icons.add, 'Meal Entry', () {
+            _buildDrawerItem(Icons.request_page_outlined, 'Meal Requests', () {
               Get.to(MealEntry());
+            }),
+            Divider(),
+            _buildDrawerItem(Icons.newspaper_rounded, 'Send Notice', () {
+              Get.to(SendNotice());
             }),
             Divider(),
             _buildDrawerItem(Icons.logout, 'Logout', () => adminlogout(context)),

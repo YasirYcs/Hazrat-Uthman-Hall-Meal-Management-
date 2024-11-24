@@ -14,11 +14,14 @@ class _MealMenuState extends State<MealMenu> {
   final TextEditingController _lunchController = TextEditingController();
   final TextEditingController _dinnerController = TextEditingController();
   String _formattedDateTime = '';
-  String _submittedData = '';
   String _username = 'Loading...';
+  String _currentDate = '';
+  String breakfastMenu = "No Ready Yet";
+  String lunchMenu = "No Ready Yet";
+  String dinnerMenu = "No Ready Yet";
 
-  final _databaseReference = FirebaseDatabase.instance.ref().child('meal_menu');
-  final _firestore = FirebaseFirestore.instance;
+  final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref().child('meal_menu');
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -26,10 +29,12 @@ class _MealMenuState extends State<MealMenu> {
     _updateDateTime();
     Future.delayed(Duration(seconds: 1), _updateDateTime);
     _fetchUserData();
+    _currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    fetchMealData(_currentDate);
   }
 
   Future<void> _fetchUserData() async {
-    String uid = FirebaseAuth.instance.currentUser!.uid;
+    String uid = FirebaseAuth.instance.currentUser !.uid;
 
     try {
       DocumentSnapshot userDoc = await _firestore.collection('students').doc(uid).get();
@@ -40,19 +45,16 @@ class _MealMenuState extends State<MealMenu> {
             _username = userData['fullName'];
           });
         } else {
-          print('Error fetching user data: "fullName" field not found');
           setState(() {
-            _username = 'User data incomplete';
+            _username = 'User  data incomplete';
           });
         }
       } else {
-        print('Error fetching user data: User document not found');
         setState(() {
-          _username = 'User not found';
+          _username = 'User  not found';
         });
       }
     } catch (e) {
-      print('Error fetching user data: $e');
       setState(() {
         _username = 'Error fetching user data';
       });
@@ -66,33 +68,59 @@ class _MealMenuState extends State<MealMenu> {
     Future.delayed(Duration(seconds: 1), _updateDateTime);
   }
 
+  Future<void> fetchMealData(String date) async {
+    try {
+      DatabaseReference mealRef = _databaseReference.child(date);
+      DataSnapshot snapshot = await mealRef.get();
+      if (snapshot.exists && snapshot.value != null) {
+        Map<String, dynamic> data = Map<String, dynamic>.from(snapshot.value as Map);
+        setState(() {
+          breakfastMenu = data['breakfast'] ?? "No Ready Yet";
+          lunchMenu = data['lunch'] ?? "No Ready Yet";
+          dinnerMenu = data['dinner'] ?? "No Ready Yet";
+        });
+      } else {
+        setState(() {
+          breakfastMenu = "No Ready Yet";
+          lunchMenu = "No Ready Yet";
+          dinnerMenu = "No Ready Yet";
+        });
+      }
+    } catch (e) {
+      print('Error fetching meal data: $e');
+      setState(() {
+        breakfastMenu = "Error loading breakfast";
+        lunchMenu = "Error loading lunch";
+        dinnerMenu = "Error loading dinner";
+      });
+    }
+  }
+
   void _submitMealMenu() {
     String breakfast = _breakfastController.text;
     String lunch = _lunchController.text;
     String dinner = _dinnerController.text;
 
     if (breakfast.isNotEmpty || lunch.isNotEmpty || dinner.isNotEmpty) {
-      String date = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-      _databaseReference.child(date).set({
+      _databaseReference.child(_currentDate).set({
         'breakfast': breakfast,
         'lunch': lunch,
         'dinner': dinner,
         'submittedAt': _formattedDateTime,
       }).then((_) {
         setState(() {
-          _submittedData = 'Breakfast: $breakfast, Lunch: $lunch, Dinner: $dinner';
+          // Clear the input fields
+          _breakfastController.clear();
+          _lunchController.clear();
+          _dinnerController.clear();
         });
-        _breakfastController.clear();
-        _lunchController.clear();
-        _dinnerController.clear();
+        fetchMealData(_currentDate); // Refresh the meal data after submission
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Meal menu submitted successfully!')),
         );
       }).catchError((error) {
-        print('Failed to submit meal menu: $error');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to submit meal menu')),
+          SnackBar (content: Text('Failed to submit meal menu')),
         );
       });
     } else {
@@ -102,13 +130,18 @@ class _MealMenuState extends State<MealMenu> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Meal Menu'),
+        title: Text('Meal Menu', textAlign: TextAlign.center),
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         backgroundColor: Colors.green,
       ),
       body: Padding(
@@ -117,78 +150,12 @@ class _MealMenuState extends State<MealMenu> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Welcome, $_username!',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'Please enter your meal options below.',
-                style: TextStyle(fontSize: 16),
-              ),
-              SizedBox(height: 20),
-
-              TextField(
-                controller: _breakfastController,
-                decoration: InputDecoration(
-                  labelText: 'Breakfast',
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-              ),
-              Divider(height: 20, thickness: 1, color: Colors.grey),
-              TextField(
-                controller: _lunchController,
-                decoration: InputDecoration(
-                  labelText: 'Lunch',
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-              ),
-              Divider(height: 20, thickness: 1, color: Colors.grey),
-              TextField(
-                controller: _dinnerController,
-                decoration: InputDecoration(
-                  labelText: 'Dinner',
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-              ),
-              SizedBox(height: 20),
-
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: _submitMealMenu,
-                child: Text('Update'),
-              ),
-              SizedBox(height: 10),
-              SizedBox(height: 20),
-
-              Text(
-                'Current Date and Time:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                _formattedDateTime,
-                style: TextStyle(fontSize: 16),
-              ),
-              SizedBox(height: 20),
-
-              Text(
-                'Submitted Meal Options:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+              // Welcome Section
               Container(
-                padding: EdgeInsets.all(10),
+                padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.green[100],
+                  borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black26,
@@ -197,14 +164,140 @@ class _MealMenuState extends State<MealMenu> {
                     ),
                   ],
                 ),
-                child: Text(
-                  _submittedData.isNotEmpty ? _submittedData : 'No meal options submitted yet.',
-                  style: TextStyle(fontSize: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Welcome, $_username!',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green[800]),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Please enter your meal options below.',
+                      style: TextStyle(fontSize: 16, color: Colors.green[600]),
+                    ),
+                  ],
                 ),
               ),
+             // SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Divider(thickness: 2,),
+              ),
+
+              // Meal Input Container
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green[100], // Gray with opacity
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 4,
+                      offset: Offset(2, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Text(
+                        'Current Date and Time\n $_formattedDateTime',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    _buildMealInputField('Breakfast', _breakfastController),
+                    SizedBox(height: 10),
+                    _buildMealInputField('Lunch', _lunchController),
+                    SizedBox(height: 10),
+                    _buildMealInputField('Dinner', _dinnerController),
+                    SizedBox(height: 20),
+
+                    // Submit Button
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                        ),
+                        onPressed: _submitMealMenu,
+                        child: Text('Update', style: TextStyle(fontSize: 18)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10),
+           Divider(thickness: 2,),
+              SizedBox(height: 10),
+              // Submitted Meal Options
+              _buildInfoCard('Submitted Meal Options',
+                  'Breakfast: $breakfastMenu\nLunch: $lunchMenu\nDinner: $dinnerMenu'),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildMealInputField(String label, TextEditingController controller) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 4,
+            offset: Offset(2, 2),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(),
+          filled: true,
+          fillColor: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(String title, String content) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.green[100],
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 4,
+            offset: Offset(2, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Text(
+              title,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green[800]),
+            ),
+          ),
+          SizedBox(height: 10, width: double.infinity,),
+          Text(
+            content,
+            style: TextStyle(fontSize: 16, color: Colors.black54),
+          ),
+        ],
       ),
     );
   }
