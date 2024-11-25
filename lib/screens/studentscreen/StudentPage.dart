@@ -92,106 +92,111 @@ class _StudentPageState extends State<StudentPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            FutureBuilder<void>(
-              future: _userDataFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'Error: ${snapshot.error}',
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  );
-                } else {
-                  return Container(
-                    height: MediaQuery.of(context).size.height * 0.2,
-                    margin: const EdgeInsets.all(12.0),
-                    decoration: BoxDecoration(
-                      color: Colors.teal,
-                      borderRadius: BorderRadius.circular(12.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Center(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          // Trigger a refresh when the user pulls down
+          await _fetchUserData(); // Call to refresh user data
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              FutureBuilder<void>(
+                future: _userDataFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(
                       child: Text(
-                        welcomeMessage,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                        'Error: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    );
+                  } else {
+                    return Container(
+                      height: MediaQuery.of(context).size.height * 0.2,
+                      margin: const EdgeInsets.all(12.0),
+                      decoration: BoxDecoration(
+                        color: Colors.teal,
+                        borderRadius: BorderRadius.circular(12.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          welcomeMessage,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }
-              },
-            ),
-            const Divider(
-              thickness: 2,
-              color: Colors.grey,
-              height: 20,
-            ),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2, // Increase the number of tiles in each row
-                mainAxisSpacing: 1, // Reduce vertical spacing between tiles
-                crossAxisSpacing: 4, // Reduce horizontal spacing between tiles
-                childAspectRatio: 1.05, // Adjust height and width
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Get.to(() => MealBook());
-                    },
-                    child: _buildGridTile('assets/photos/meals.json', 'Book Meal'),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Get.to(() => MealStatus());
-                    },
-                    child: _buildGridTile('assets/photos/MealStatus.json', 'Meal Status'),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Get.to(() => Notice());
-                    },
-                    child: _buildGridTile('assets/photos/to do.json', 'Notice'),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Get.to(() => PrayerTimesPage());
-                    },
-                    child: _buildGridTile('assets/photos/Prayer.json', 'Prayer'),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Get.to(() => StudentProfile());
-                    },
-                    child: _buildGridTile('assets/photos/dashboard.json', 'Profile'),
-                  ),
-
-                  GestureDetector(
-                    onTap: () {
-                      Get.to(() => AboutPage());
-                    },
-                    child: _buildGridTile('assets/photos/AboutMe.json', 'About Me'),
-                  ),
-                ],
+                    );
+                  }
+                },
               ),
-            ),
-          ],
+              const Divider(
+                thickness: 2,
+                color: Colors.grey,
+                height: 20,
+              ),
+              Expanded(
+                child: GridView.count(
+                  crossAxisCount: 2, // Increase the number of tiles in each row
+                  mainAxisSpacing: 1, // Reduce vertical spacing between tiles
+                  crossAxisSpacing: 4, // Reduce horizontal spacing between tiles
+                  childAspectRatio: 1.05, // Adjust height and width
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Get.to(() => MealBook());
+                      },
+                      child: _buildGridTile('assets/photos/meals.json', 'Book Meal'),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Get.to(() => MealStatus());
+                      },
+                      child: _buildGridTile('assets/photos/MealStatus.json', 'Meal Status'),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Get.to(() => Notice());
+                      },
+                      child: _buildGridTile('assets/photos/to do.json', 'Notice'),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Get.to(() => PrayerTimesPage());
+                      },
+                      child: _buildGridTile('assets/photos/Prayer.json', 'Prayer'),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Get.to(() => StudentProfile());
+                      },
+                      child: _buildGridTile('assets/photos/dashboard.json', 'Profile'),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Get.to(() => AboutPage());
+                      },
+                      child: _buildGridTile('assets/photos/AboutMe.json', 'About Me'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

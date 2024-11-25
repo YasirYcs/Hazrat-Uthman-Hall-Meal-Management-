@@ -21,6 +21,8 @@ class StudentloginPage extends StatelessWidget {
         children: [
           // FlutterLogin section (unchanged)
           FlutterLogin(
+
+            logo: "assets/photos/HazaratUthman2.png" ,
             onLogin: (LoginData data) => authUser(data),
             onRecoverPassword: (String email) => recoverPassword(email),
             onSignup: (SignupData data) => signUp(data),
@@ -28,7 +30,7 @@ class StudentloginPage extends StatelessWidget {
 
           // "STUDENT PAGE" label (unchanged)
           Positioned(
-            top: 80,
+            top: 60,
             left: 80,
             child: Theme(
               data: ThemeData(

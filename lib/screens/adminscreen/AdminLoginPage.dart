@@ -24,13 +24,14 @@ class AdminloginPage extends StatelessWidget {
           children: [
 
             FlutterLogin(
+              logo: "assets/photos/ieee.jpg" ,
               onLogin:  (LoginData data) => authAdmin(data),
               onRecoverPassword: (String email) => recoverPassword(email),
-              onSignup: (SignupData data) => signUp(data),
+              onSignup:null, //(SignupData data) => signUp(data),
             ),
 
             Positioned(
-              top: 80,
+              top: 60,
               left: 80,
               child: Theme(
                 data: ThemeData(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hallmeal/screens/Registration/RegistrationPage.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'StudentProfileEdit.dart';
 import 'package:get/get.dart';
@@ -15,6 +16,7 @@ class StudentProfile extends StatefulWidget {
 class _StudentDetailShowState extends State<StudentProfile> {
   final RefreshController _refreshController = RefreshController(initialRefresh: false);
   Future<Map<String, dynamic>?>? _studentData;
+  bool _isExpanded = false; // Track the state of the floating button
 
   @override
   void initState() {
@@ -22,7 +24,7 @@ class _StudentDetailShowState extends State<StudentProfile> {
     _fetchStudentData();
   }
 
-  final user = FirebaseAuth.instance.currentUser;
+  final user = FirebaseAuth.instance.currentUser ;
 
   Future<void> _fetchStudentData() async {
     try {
@@ -51,6 +53,17 @@ class _StudentDetailShowState extends State<StudentProfile> {
   void _onRefresh() async {
     await _fetchStudentData();
     _refreshController.refreshCompleted();
+  }
+
+  void _onFabPressed() {
+    if (_isExpanded) {
+      // Perform action when the button is clicked again
+      print("User  confirmed registration status.");
+      // You can add your function here
+    }
+    setState(() {
+      _isExpanded = !_isExpanded; // Toggle the expanded state
+    });
   }
 
   @override
@@ -119,6 +132,49 @@ class _StudentDetailShowState extends State<StudentProfile> {
             },
           ),
         ),
+      ),
+      floatingActionButton: Stack(
+        children: [
+          // Expanded button
+          if (_isExpanded)
+            Positioned(
+              bottom: 80,
+              right:  16,
+              child: Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Color(0xFF5A4A75),
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    Get.to(RegistrationRequestPage());
+                  },
+                  child: Text(
+                    'Are you registered?',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+              ),
+            ),
+          // Floating Action Button
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: FloatingActionButton(
+              onPressed: _onFabPressed,
+              backgroundColor: Color(0xFF5A4A75),
+              child: Icon(_isExpanded ? Icons.close : Icons.add),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -31,7 +31,7 @@ Future<String?> authUser (LoginData data) async {
       String role = userDoc['role']; // Get the role from Firestore
 
       // Check if the user is a student
-      if (role == 'student') {
+      if (role == 'student' || role == 'admin' ) {
         // Show login success message using Snackbar
         Get.snackbar(
           'Login Successful',
@@ -47,7 +47,7 @@ Future<String?> authUser (LoginData data) async {
         return 'You are not registered as a student.';
       }
     } else {
-      return 'User  document does not exist.';
+      return 'Data does not exist.';
     }
 
     return null; // Return null on successful login

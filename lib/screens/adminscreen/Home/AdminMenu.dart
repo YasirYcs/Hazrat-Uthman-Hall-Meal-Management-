@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hallmeal/screens/Registration/RegistrationAccept.dart';
 import 'package:hallmeal/screens/adminscreen/AdminLoginPage.dart';
 import 'package:hallmeal/screens/adminscreen/Bazar/BazarEntry.dart';
 import 'package:hallmeal/screens/adminscreen/Meal/MealRequests.dart';
@@ -137,12 +138,12 @@ class _AdminMenuState extends State<AdminMenu> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hall Meal Management System IIUC'),
+        title: const Text('Hazrat Uthman Hall'),
         backgroundColor: Colors.teal,  // Updated color
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Image.asset('assets/photos/Pradduman.png', height: 40),
+            child: Image.asset('assets/photos/HazratUthman.png', height: 40),
           ),
         ],
       ),
@@ -152,29 +153,52 @@ class _AdminMenuState extends State<AdminMenu> {
           children: <Widget>[
             const DrawerHeader(
               decoration: BoxDecoration(color: Colors.teal),  // Updated color
-              child: Text(
-                'Admin Menu',
-                style: TextStyle(color: Colors.white, fontSize: 24),
+              child: Column(
+                children: [
+                  Text(
+                    'Admin Menu',
+                    style: TextStyle(color: Colors.black87, fontSize: 24),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      CircleAvatar(backgroundImage: AssetImage("assets/photos/HazaratUthman2.png"),
+                      radius: 40,),
+                      Text(
+                        'HUH!',
+                        style: TextStyle(color: Color(0xFF5A4A75), fontSize: 54),
+                      ),
+                    ],
+                  )
+                ],
               ),
             ),
+
             _buildDrawerItem(Icons.fastfood, 'Set Meal Menu', () {
               Get.to(MealMenu());
             }),
-            const Divider(),
-            _buildDrawerItem(Icons.list, 'Bazars Entry ', () {
-              Get.to(BazarEntry(username: _fullName ?? 'User '));
-            }),
+
             const Divider(),
             _buildDrawerItem(Icons.request_page_outlined, 'Meal Requests', () {
               Get.to(MealRequests());
             }),
             const Divider(),
+
             _buildDrawerItem(Icons.newspaper_rounded, 'Meal Sheet', () {
               Get.to(MealSheet());
             }),
             const Divider(),
+            _buildDrawerItem(Icons.list, 'Bazars Entry ', () {
+              Get.to(BazarEntry(username: _fullName ?? 'User '));
+            }),
+
+            const Divider(),
             _buildDrawerItem(Icons.notifications, 'Send Notice', () {
               Get.to(SendNotice());
+            }),
+            const Divider(),
+            _buildDrawerItem(Icons.people_alt, 'Registered Students', () {
+              Get.to(RequestAcceptPage());
             }),
             const Divider(),
             _buildDrawerItem(Icons.logout, 'Logout', () => adminlogout(context)),
@@ -204,7 +228,7 @@ class _AdminMenuState extends State<AdminMenu> {
             padding: const EdgeInsets.all(16.0),
             child: CircleAvatar(
               radius: 40,
-              backgroundImage: const AssetImage('assets/photos/Pradduman.png'),
+              backgroundImage: const AssetImage('assets/photos/HazratUthman.png'),
             ),
           ),
           Column(

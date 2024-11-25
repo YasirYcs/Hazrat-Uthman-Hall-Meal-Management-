@@ -42,21 +42,21 @@ class InfoCard extends StatelessWidget {
         children: [
           Center(
             child: Text(
-              'Live Date and Time:',
+              'Live Date and Time',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
           Center(
             child: Text(
               formattedDateTime,
-              style: TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16,color: Colors.teal),
             ),
           ),
+          Divider(thickness: 2,),
           _buildInfoBlock('Meal Rate', '${mealRate.toStringAsFixed(2)}'), // Format to 2 decimal places
           _buildInfoBlock('Total Meal Today', '$totalMealsToday'),
           _buildInfoBlock('Total Meal This Month', '$totalMealsThisMonth'),
           _buildInfoBlock('Total Bazar This Month', '${totalBazarAmount ?? 0}'),
-          _buildInfoBlock('Total Students', '200'),
         ],
       ),
     );
