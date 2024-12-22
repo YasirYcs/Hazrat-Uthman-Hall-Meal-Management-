@@ -1,4 +1,4 @@
-# 🎉 Hazrat Uthman (R) Hall Meal Management App 🎉
+# 🎉 Hazrat Uthman (R) Hall Meal Management 🎉
 
 ## 🔑 Admin Login Credentials  
 - **Email:** yaair.sami.501@gmail.com  
